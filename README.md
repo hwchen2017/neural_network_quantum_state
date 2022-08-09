@@ -22,7 +22,7 @@ $$
 
 Jastrow wave function with single parameter
 
-$$ J(\alpha, \vec{s})=e^{-\alpha\sum_{i<j}\frac{\hat{S}^z_i \hat{S}^z_j}{|j-i|}} $$
+$$ J(\alpha, \vec{s})=e^{-\sum_{ij}\alpha_{ij}{\hat{S}^z_i \hat{S}^z_j}}$$
 
 On a 4 sites chain, the variational energy can be calculated analytically. Here is the comparison of the exact results with variational Monte Carlo results. 
 ![jastrow](./images/jastrow_exact.png)
