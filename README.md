@@ -33,10 +33,15 @@ On a 4 sites chain, the variational energy can be calculated analytically. Here 
 Gradient descent:
 
 $$ \alpha = \alpha-\lambda\frac{\partial E}{\partial\alpha}$$
+
 $$ \frac{\partial E}{\partial\alpha}=2\frac{\langle\frac{\partial\psi}{\partial\alpha}|H|\psi\rangle}{\langle\psi|\psi\rangle}-2E\frac{\langle\frac{\partial\psi}{\partial\alpha}|\psi\rangle}{\langle\psi|\psi\rangle}$$
+
 Define
+
 $$|\frac{\partial\psi}{\partial\alpha}\rangle=O|\psi\rangle$$
+
 Then
+
 $$ \frac{\partial E}{\partial\alpha}=2\frac{\langle\psi|OH|\psi\rangle}{\langle\psi|\psi\rangle}-2\langle E\rangle\frac{\langle\psi|O|\psi\rangle}{\langle\psi|\psi\rangle}=2\langle EO\rangle-2\langle E\rangle\langle O\rangle$$
 
 ![jastrow_single](./images/jastrow_single_optimize.png)
