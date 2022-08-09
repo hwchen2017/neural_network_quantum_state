@@ -38,7 +38,7 @@ $$ \frac{\partial E}{\partial\alpha}=2\frac{\langle\frac{\partial\psi}{\partial\
 
 Define
 
-$$|\frac{\partial\psi}{\partial\alpha}\rangle=O|\psi\rangle$$
+$$ O = \frac{1}{|\psi\rangle} |\frac{\partial\psi}{\partial\alpha}\rangle$$
 
 Then
 
@@ -56,6 +56,8 @@ $$J(\alpha_{ij}, \vec{s})=e^{-\sum_{ij}\alpha_{ij}{\hat{S}^z_i \hat{S}^z_j}} $$
 Restricted Boltzman machine wave function
 
 $$ \psi(\vec{s}, a, b ,W) = e^{\sum_{i=1}^N a_i s^z_i } \prod_{i=1}^M 2\cosh{(\sum_{j=1}^N W_{ij}s^z_j + b_i)} $$
+
+All the parameters in the wave function are complex numbers. 
 
 ### Optimize the Restricted Boltzman Machine wave function
 ![compare](./images/compare.png)
