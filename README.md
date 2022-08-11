@@ -2,6 +2,8 @@
 
 This is a Python implementation of neural network quantum state introduced in the paper "Solving the quantum many-body problem with artificial neural networks". 
 
+Required library: `Numpy, Numba, MPI4Py, Matplotlib`
+
 Hamiltonian
 
 $$ \hat{H}=\sum_{i=1}^{N-1}
@@ -60,4 +62,11 @@ $$ \psi(\vec{s}, a, b ,W) = e^{\sum_{i=1}^N a_i s^z_i } \prod_{i=1}^M 2\cosh{(\s
 All the parameters in the wave function are complex numbers. 
 
 ### Optimize the Restricted Boltzman Machine wave function
+
+In the modified natural gradient descent method, the Fubini-study
+metric, which is the complex-valued form of Fisher information, is used to measure the "distance" between wave functions |ψ〉 and |φ〉. NGD can greatly improve the convengence speed as shown below. 
+
+$$\begin{equation}
+    \gamma(\psi,\phi)=\arccos{ \sqrt{ \frac{\langle\psi|\phi\rangle\langle\phi|\psi\rangle}{ \langle\psi|\psi\rangle\langle\phi|\phi\rangle }} }.
+\end{equation}$$
 ![compare](./images/compare.png)
