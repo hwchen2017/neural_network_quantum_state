@@ -3,6 +3,7 @@ import cmath
 import numba
 import time
 from matplotlib import pyplot
+from mpi4py import MPI
 
 
 @numba.jit
@@ -65,11 +66,11 @@ def local_energy(state, coeff, alpha, Nsite):
 	return res - 0.5 * ssum
 
 
+
 @numba.jit
 def metropolis(alpha, Nsite, Nsample=2000, Nskip = 3):
 
 	state = np.ones(Nsite) 
-	# state = state.astype(np.double)
 	state[: Nsite//2] = -1
 
 	state *= 0.5
@@ -126,7 +127,7 @@ def metropolis(alpha, Nsite, Nsample=2000, Nskip = 3):
 	flat_logder_sum /= Nsample
 	logder_outer_sum /= Nsample
 
-
+	'''
 	logder_outer_sum -= np.outer( np.conjugate(flat_logder_sum), flat_logder_sum)
 
 
@@ -138,54 +139,88 @@ def metropolis(alpha, Nsite, Nsample=2000, Nskip = 3):
 	derivative = np.linalg.solve(logder_outer_sum, gradient_para)
 
 	derivative = derivative.reshape((Nsite, Nsite))
+	'''
 
+	return  energy_sum, logder_sum, HO_ssum, flat_logder_sum, logder_outer_sum
 
-	return  energy_sum, derivative
-
-
-
-
-def optimize(alpha, Nsite, Nsample, lamda):
-
-	s = []
-	y_energy = []
-	t0 = time.time()
-
-	# fp = open("energy_rbm_ngd.txt", "w")
-
-	for i in range(50):
-		energy, gradient = metropolis(alpha, Nsite, Nsample)
-		# derivative = 2*hosum - 2 * logder * energy
-		# print(alpha, energy, derivative)
-		print("Step %d, energy %.4f\n" %(i, energy.real))
-		# fp.write("%d  %.4f\n" %(i, energy.real))
-		# print(hosum, ohsum, partial, energy)
-		s.append(i)
-		y_energy.append(energy)
-		alpha = alpha - lamda * gradient
-
-	# fp.close()
-	t1 = time.time()
-	print("Elapsed time: %.2f sec" % (t1 - t0))
-
-	pyplot.plot(s, np.real(np.array(y_energy)) )
-	pyplot.xlabel("Step")
-	# pyplot.legend()
-	pyplot.ylabel("Energy")
-	pyplot.title("Variational energy of RBM wave function")
-	pyplot.show()
 
 
 if(__name__ == '__main__'):
 
-	Nsite = 8
-	Nsample = 5000
-	lamda = 0.2
-	re = np.random.random((Nsite, Nsite))
-	im = np.random.random((Nsite, Nsite))
-	alpha = re + 1j*im
+	comm = MPI.COMM_WORLD
+	nprocs = comm.Get_size()
+	rank = comm.Get_rank()
 
-	optimize(alpha, Nsite, Nsample, lamda)
+	Nsite = 8
+	Nsample = 5000 //nprocs
+	lamda = 0.2
+
+
+	if(rank == 0):
+		step, vene = [], []
+		t0 = time.time()
+		re = np.random.random((Nsite, Nsite))
+		im = np.random.random((Nsite, Nsite))
+		alpha = re + 1j*im
+	else:
+		alpha = None
+
+	for i in range(40):
+
+		alpha = comm.bcast(alpha, root = 0)
+
+		# comm.Barrier()
+
+		energy_mpi, logder_mpi, HO_mpi, flat_logder_mpi, logder_outer_mpi = metropolis(alpha, Nsite, Nsample)
+
+		energy_sum = comm.reduce(energy_mpi, root=0)
+		logder_sum = comm.reduce(logder_mpi, root=0)
+		HO_ssum = comm.reduce(HO_mpi, root = 0)
+		flat_logder_sum = comm.reduce(flat_logder_mpi, root = 0)
+		logder_outer_sum = comm.reduce(logder_outer_mpi, root = 0)
+
+
+		if(rank == 0):
+
+			energy_sum /= nprocs
+			logder_sum /= nprocs
+			HO_ssum /= nprocs
+			flat_logder_sum /= nprocs
+			logder_outer_sum /= nprocs
+
+
+			logder_outer_sum -= np.outer( np.conjugate(flat_logder_sum), flat_logder_sum)
+
+			gradient = HO_ssum  - logder_sum * energy_sum
+
+			gradient_para = gradient.flatten() 
+			logder_outer_sum += np.identity(Nsite*Nsite) * 1e-5
+
+			derivative = np.linalg.solve(logder_outer_sum, gradient_para)
+			derivative = derivative.reshape((Nsite, Nsite))
+
+			alpha = alpha - lamda * derivative 
+
+
+			print("Step %d, energy %.4f\n" %(i, energy_sum.real))
+
+			step.append(i)
+			vene.append(energy_sum)
+
+		# comm.Barrier()
+	
+
+	if(rank == 0):
+
+		t1 = time.time()
+		print("Elapsed time: %.2f sec" % (t1 - t0))
+
+		pyplot.xlabel("Step")
+		pyplot.ylabel("Energy")
+		pyplot.plot(step, np.real(np.array(vene)), label="RBM using NGD")
+		pyplot.legend()
+		pyplot.show()
+
 
 
 
