@@ -66,7 +66,7 @@ All the parameters in the wave function are complex numbers.
 In the modified natural gradient descent method, the Fubini-study
 metric, which is the complex-valued form of Fisher information, is used to measure the "distance" between wave functions |ψ〉 and |φ〉. NGD can greatly improve the convengence speed as shown below. 
 
-$$\begin{equation}
-    \gamma(\psi,\phi)=\arccos{ \sqrt{ \frac{\langle\psi|\phi\rangle\langle\phi|\psi\rangle}{ \langle\psi|\psi\rangle\langle\phi|\phi\rangle }} }.
-\end{equation}$$
+$$
+    \gamma(\psi,\phi)=\arccos{ \sqrt{ \frac{\langle\psi|\phi\rangle\langle\phi|\psi\rangle}{\langle\psi|\psi\rangle\langle\phi|\phi\rangle }} }$$
+    
 ![compare](./images/compare.png)
