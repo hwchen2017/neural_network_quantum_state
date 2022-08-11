@@ -62,7 +62,7 @@ def local_energy(state, coeff, alpha, Nsite):
 
 			ssum += coefficient(state_new, alpha, Nsite)/coeff
 
-	return res - 0.5 * ssum
+	return res + 0.5 * ssum
 
 
 @numba.jit
@@ -79,7 +79,7 @@ def metropolis(alpha, Nsite, Nsample=2000, Nskip = 3):
 	logder_sum = np.zeros((Nsite,Nsite), dtype = np.cdouble)
 	HO_ssum = np.zeros((Nsite,Nsite), dtype = np.cdouble)
 
-	flat_logder_sum = np.zeros((Nsite,Nsite), dtype = np.cdouble)
+	flat_logder_sum = np.zeros(Nsite*Nsite, dtype = np.cdouble)
 	logder_outer_sum = np.zeros((Nsite*Nsite, Nsite*Nsite), dtype = np.cdouble)
 
 
@@ -140,7 +140,8 @@ def metropolis(alpha, Nsite, Nsample=2000, Nskip = 3):
 	derivative = derivative.reshape((Nsite, Nsite))
 
 
-	return  energy_sum, gradient
+	return  energy_sum, derivative
+
 
 
 
@@ -150,20 +151,20 @@ def optimize(alpha, Nsite, Nsample, lamda):
 	y_energy = []
 	t0 = time.time()
 
-	fp = open("energy_rbm_ngd.txt", "w")
+	# fp = open("energy_rbm_ngd.txt", "w")
 
-	for i in range(100):
+	for i in range(50):
 		energy, gradient = metropolis(alpha, Nsite, Nsample)
 		# derivative = 2*hosum - 2 * logder * energy
 		# print(alpha, energy, derivative)
 		print("Step %d, energy %.4f\n" %(i, energy.real))
-		fp.write("%d  %.4f\n" %(i, energy.real))
+		# fp.write("%d  %.4f\n" %(i, energy.real))
 		# print(hosum, ohsum, partial, energy)
 		s.append(i)
 		y_energy.append(energy)
 		alpha = alpha - lamda * gradient
 
-	fp.close()
+	# fp.close()
 	t1 = time.time()
 	print("Elapsed time: %.2f sec" % (t1 - t0))
 
